@@ -1,0 +1,52 @@
+# OS junk
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# IDE/editor
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Logs and runtime output
+*.log
+logs/
+*.tmp
+*.temp
+
+# Environment and secrets
+.env
+.env.*
+*.pem
+*.pfx
+*.key
+secrets.*
+
+# Node / frontend tooling
+node_modules/
+.cache/
+dist/
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# .NET build artifacts
+**/bin/
+**/obj/
+
+# Test and local tooling output
+TestResults/
+coverage/
+
+# Packaged/release artifacts
+finalexe/
+publish/
+artifacts/
+
+# Optional local shortcuts/links
+*.lnk

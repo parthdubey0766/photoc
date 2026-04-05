@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>PhotoC</AssemblyName>
+    <RootNamespace>PhotoC</RootNamespace>
+    <AssemblyTitle>PhotoC — Phone Photo Compressor</AssemblyTitle>
+    <Company>PhotoC</Company>
+    <Version>1.0.0</Version>
+    <ApplicationIcon>Assets\PhotoC.ico</ApplicationIcon>
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>true</SelfContained>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <!-- Memory optimisation: use Workstation GC (lower footprint than Server GC) -->
+    <ServerGarbageCollection>false</ServerGarbageCollection>
+    <ConcurrentGarbageCollection>true</ConcurrentGarbageCollection>
+    <RetainVMGarbageCollection>false</RetainVMGarbageCollection>
+    <GarbageCollectionAdaptationMode>0</GarbageCollectionAdaptationMode>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\PhotoC.ico" />
+    <PackageReference Include="H.NotifyIcon.Wpf" Version="2.4.1" />
+    <!-- Q8 uses half the memory per pixel vs Q16 — perfect for 8-bit phone photos -->
+    <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="14.11.1" />
+    <PackageReference Include="MaterialDesignThemes" Version="5.3.1" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.5" />
+    <PackageReference Include="Serilog" Version="4.3.1" />
+    <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
+  </ItemGroup>
+
+</Project>
