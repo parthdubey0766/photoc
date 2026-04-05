@@ -1,0 +1,19 @@
+* text=auto
+
+# Enforce LF in repo for source/text files while allowing checkout conversion.
+*.cs text eol=lf
+*.xaml text eol=lf
+*.xml text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+
+# Binary assets
+*.ico binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.dll binary
+*.exe binary
