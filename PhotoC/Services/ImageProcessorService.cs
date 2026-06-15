@@ -78,7 +78,7 @@ public class ImageProcessorService
             Log.Information("Large file detected '{File}' ({Size} MB) — targeting 60–95% reduction",
                 fileName, originalSize / (1024 * 1024));
 
-        string tmpPath = filePath + ".photoc.tmp";
+        string tmpPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N") + "_" + fileName + ".photoc.tmp");
         bool success = false;
         var sw = Stopwatch.StartNew();
 
@@ -185,10 +185,15 @@ public class ImageProcessorService
             FileError?.Invoke(filePath, ex.Message);
             return false;
         }
+        catch (UnauthorizedAccessException ex)
+        {
+            Log.Warning("Access denied for '{File}': {Msg}", fileName, ex.Message);
+            throw; // let RetryAsync handle it
+        }
         catch (IOException ex)
         {
             Log.Warning("IO error for '{File}': {Msg}", fileName, ex.Message);
-            throw;
+            throw; // let RetryAsync handle it
         }
         catch (Exception ex)
         {
@@ -304,10 +309,15 @@ public class ImageProcessorService
             FileError?.Invoke(filePath, ex.Message);
             return false;
         }
+        catch (UnauthorizedAccessException ex)
+        {
+            Log.Warning("Access denied for '{File}': {Msg}", fileName, ex.Message);
+            throw; // let RetryAsync handle it
+        }
         catch (IOException ex)
         {
             Log.Warning("IO error for '{File}': {Msg}", fileName, ex.Message);
-            throw;
+            throw; // let RetryAsync handle it
         }
         catch (Exception ex)
         {
@@ -535,8 +545,9 @@ public class ImageProcessorService
 
     /// <summary>
     /// Move the temp file to the final location.
-    /// In output-folder mode, the original is left untouched.
-    /// In in-place mode, the original is atomically replaced.
+    /// Handles read-only files (phone photos transferred via USB) and
+    /// files temporarily locked by Explorer thumbnails or antivirus.
+    /// Falls back from File.Replace → File.Copy+Delete if needed.
     /// </summary>
     private static void FinalizeOutput(
         string originalPath, string tmpPath, string targetPath, AppSettings settings)
@@ -545,21 +556,97 @@ public class ImageProcessorService
         {
             // Output folder mode — move compressed to destination, delete original
             Directory.CreateDirectory(settings.OutputFolderPath);
+            ClearReadOnly(tmpPath);
+            ClearReadOnly(originalPath);
             File.Move(tmpPath, targetPath, overwrite: true);
             File.Delete(originalPath);
             Log.Debug("Saved compressed copy to: {Path} and removed original", targetPath);
         }
         else if (targetPath == originalPath)
         {
-            // In-place, same extension — atomic replace
-            File.Replace(tmpPath, originalPath, null);
+            // In-place, same extension — clear ReadOnly then atomic replace
+            ClearReadOnly(originalPath);
+            ClearReadOnly(tmpPath);
+            try
+            {
+                File.Replace(tmpPath, originalPath, null);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                // File.Replace can fail even after clearing ReadOnly when the
+                // file is locked by Explorer thumbnail cache, OneDrive sync,
+                // or antivirus. Fallback: copy + delete.
+                Log.Debug("File.Replace failed for '{File}', falling back to copy+delete.",
+                    Path.GetFileName(originalPath));
+                FallbackReplaceWithRetry(tmpPath, originalPath);
+            }
+            catch (IOException)
+            {
+                Log.Debug("File.Replace IO error for '{File}', falling back to copy+delete.",
+                    Path.GetFileName(originalPath));
+                FallbackReplaceWithRetry(tmpPath, originalPath);
+            }
         }
         else
         {
             // In-place, extension changed (BMP/TIFF → PNG)
+            ClearReadOnly(originalPath);
+            ClearReadOnly(tmpPath);
             File.Move(tmpPath, targetPath, overwrite: true);
             File.Delete(originalPath);
         }
+    }
+
+    /// <summary>
+    /// Clears the ReadOnly attribute if set. Phone photos transferred via
+    /// USB cable often arrive with ReadOnly, which blocks File.Replace.
+    /// </summary>
+    private static void ClearReadOnly(string path)
+    {
+        try
+        {
+            if (!File.Exists(path)) return;
+            var attrs = File.GetAttributes(path);
+            if (attrs.HasFlag(FileAttributes.ReadOnly))
+            {
+                File.SetAttributes(path, attrs & ~FileAttributes.ReadOnly);
+                Log.Debug("Cleared ReadOnly on '{File}'", Path.GetFileName(path));
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Debug("Could not clear ReadOnly on '{File}': {Msg}",
+                Path.GetFileName(path), ex.Message);
+        }
+    }
+
+    /// <summary>
+    /// Fallback replacement: waits briefly for file locks to release, then
+    /// copies the temp over the original and deletes the temp.
+    /// Retries up to 3 times with 500ms delays.
+    /// </summary>
+    private static void FallbackReplaceWithRetry(string tmpPath, string targetPath)
+    {
+        for (int attempt = 1; attempt <= 3; attempt++)
+        {
+            try
+            {
+                Thread.Sleep(500 * attempt); // wait for locks to release
+                ClearReadOnly(targetPath);
+                File.Copy(tmpPath, targetPath, overwrite: true);
+                TryDelete(tmpPath);
+                return;
+            }
+            catch (Exception ex) when (attempt < 3)
+            {
+                Log.Debug("Fallback replace attempt {Attempt}/3 for '{File}': {Msg}",
+                    attempt, Path.GetFileName(targetPath), ex.Message);
+            }
+        }
+        // Final attempt — let it throw if it still fails
+        ClearReadOnly(targetPath);
+        File.Copy(tmpPath, targetPath, overwrite: true);
+        TryDelete(tmpPath);
     }
 
     // -----------------------------------------------------------------

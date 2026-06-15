@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Documents;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
 
@@ -28,6 +29,16 @@ public partial class LogWindow : Window
         _refreshTimer.Tick += (_, _) => RefreshLog();
         _refreshTimer.Start();
         RefreshLog();
+    }
+
+    private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        DragMove();
+    }
+
+    private void CloseButton_Click(object sender, RoutedEventArgs e)
+    {
+        Close();
     }
 
     private void RefreshLog()
@@ -73,13 +84,15 @@ public partial class LogWindow : Window
     {
         var run = new Run(line + "\n");
         if (line.Contains("[WRN]") || line.Contains("[WAR]"))
-            run.Foreground = Brushes.Yellow;
+            run.Foreground = new SolidColorBrush(Color.FromRgb(0xF0, 0x88, 0x3E)); // Orange
         else if (line.Contains("[ERR]") || line.Contains("[FAT]"))
-            run.Foreground = Brushes.Red;
+            run.Foreground = new SolidColorBrush(Color.FromRgb(0xF8, 0x54, 0x49)); // Red
         else if (line.Contains("[DBG]"))
-            run.Foreground = Brushes.LightSkyBlue;
+            run.Foreground = new SolidColorBrush(Color.FromRgb(0x58, 0xA6, 0xFF)); // Blue
+        else if (line.Contains("✓") || line.Contains("Compressed"))
+            run.Foreground = new SolidColorBrush(Color.FromRgb(0x3F, 0xB9, 0x50)); // Green
         else
-            run.Foreground = Brushes.White;
+            run.Foreground = new SolidColorBrush(Color.FromRgb(0xC9, 0xD1, 0xD9)); // Light gray
 
         _paragraph.Inlines.Add(run);
 
@@ -88,11 +101,7 @@ public partial class LogWindow : Window
             _paragraph.Inlines.Remove(_paragraph.Inlines.FirstInline);
     }
 
-    private void ClearButton_Click(object sender, RoutedEventArgs e)
-    {
-        _paragraph.Inlines.Clear();
-        _lastPos = 0;
-    }
+
 
     private void OpenFolderButton_Click(object sender, RoutedEventArgs e)
     {
@@ -108,3 +117,4 @@ public partial class LogWindow : Window
         base.OnClosed(e);
     }
 }
+

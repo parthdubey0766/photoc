@@ -18,6 +18,7 @@ public partial class App : Application
     
     private TaskbarIcon _taskbarIcon = null!;
     private ConfigurationService _config = null!;
+    private HistoryManager _history = null!;
     private FolderWatcherService _watcher = null!;
     private QueueService _queue = null!;
     private ImageProcessorService _processor = null!;
@@ -49,9 +50,10 @@ public partial class App : Application
         LoggingHelper.Configure(_config.GetLogDirectory());
         Log.Information("PhotoC WPF starting. Version 1.0.0");
 
+        _history = new HistoryManager();
         _processor = new ImageProcessorService(_config);
         _queue = new QueueService(_processor);
-        _watcher = new FolderWatcherService(_queue, _config.Current);
+        _watcher = new FolderWatcherService(_queue, _config.Current, _history);
 
         // 3. Initialize Tray Icon UI
         CreateTrayIcon();
@@ -163,6 +165,9 @@ public partial class App : Application
         {
             hasOpenWindows = Current.Windows.OfType<Window>().Any();
         });
+
+        UpdateFolderHistory();
+
         if (hasOpenWindows) return;
 
         Log.Information("Queue empty — starting {Min}-minute idle shutdown timer.", IdleShutdownMinutes);
@@ -188,6 +193,16 @@ public partial class App : Application
     {
         Log.Information("Idle for {Min} minutes — auto-shutting down to free system resources.", IdleShutdownMinutes);
         Dispatcher.Invoke(() => Current.Shutdown());
+    }
+
+    private void UpdateFolderHistory()
+    {
+        var watchedFolder = _config.Current.WatchedFolderPath;
+        if (string.IsNullOrWhiteSpace(watchedFolder) || !Directory.Exists(watchedFolder))
+            return;
+
+        var currentSize = FolderHelper.CalculateFolderSize(watchedFolder, _config.Current.FileExtensions);
+        _history.UpdateFolderSize(watchedFolder, currentSize);
     }
 
     private void ShowBalloon(string title, string text)

@@ -24,7 +24,9 @@ public static class FileHelper
                 await action();
                 return true;
             }
-            catch (IOException ex) when (attempt < maxAttempts)
+            catch (Exception ex) when (
+                (ex is IOException || ex is UnauthorizedAccessException) 
+                && attempt < maxAttempts)
             {
                 int delay = baseDelayMs * (int)Math.Pow(2, attempt - 1);
                 Log.Warning("Retry {Attempt}/{Max} for '{Context}': {Msg}. Waiting {Delay}ms.",

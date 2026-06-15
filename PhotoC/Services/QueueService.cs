@@ -9,7 +9,7 @@ namespace PhotoC.Services;
 /// </summary>
 public class QueueService : IDisposable
 {
-    private readonly BlockingCollection<string> _queue = new(boundedCapacity: 100);
+    private readonly BlockingCollection<string> _queue = new();
     private readonly ImageProcessorService _processor;
     private CancellationTokenSource _cts = new();
     private readonly List<Task> _workerTasks = new();

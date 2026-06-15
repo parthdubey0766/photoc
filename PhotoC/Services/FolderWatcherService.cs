@@ -13,6 +13,7 @@ namespace PhotoC.Services;
 public class FolderWatcherService : IDisposable
 {
     private readonly QueueService _queue;
+    private readonly HistoryManager _history;
     private FileSystemWatcher? _watcher;
 
     // Debounce dictionary: filePath → timer that fires when quiet period ends
@@ -27,10 +28,11 @@ public class FolderWatcherService : IDisposable
     /// <summary>Raised when the watched folder becomes inaccessible.</summary>
     public event Action<string>? WatcherError;
 
-    public FolderWatcherService(QueueService queue, AppSettings settings)
+    public FolderWatcherService(QueueService queue, AppSettings settings, HistoryManager history)
     {
         _queue = queue;
         _settings = settings;
+        _history = history;
     }
 
     // -----------------------------------------------------------------
@@ -57,7 +59,7 @@ public class FolderWatcherService : IDisposable
         _watcher = new FileSystemWatcher(_settings.WatchedFolderPath)
         {
             NotifyFilter = NotifyFilters.FileName | NotifyFilters.LastWrite,
-            IncludeSubdirectories = false,
+            IncludeSubdirectories = true,
             EnableRaisingEvents = true
         };
 
@@ -196,7 +198,14 @@ public class FolderWatcherService : IDisposable
     {
         try
         {
-            var files = Directory.EnumerateFiles(_settings.WatchedFolderPath, "*.*", SearchOption.TopDirectoryOnly)
+            var currentFolderSize = FolderHelper.CalculateFolderSizeRecursive(_settings.WatchedFolderPath, _settings.FileExtensions);
+            if (_history.HasUnchangedFolderSize(_settings.WatchedFolderPath, currentFolderSize))
+            {
+                Log.Information("Skipping folder: No changes detected");
+                return;
+            }
+
+            var files = Directory.EnumerateFiles(_settings.WatchedFolderPath, "*.*", SearchOption.AllDirectories)
                 .Where(path => _settings.FileExtensions.Contains(Path.GetExtension(path).ToLowerInvariant()))
                 .Where(path => !path.EndsWith(".photoc.tmp", StringComparison.OrdinalIgnoreCase))
                 .ToList();

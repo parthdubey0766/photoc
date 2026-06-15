@@ -10,7 +10,7 @@
         Background="Transparent"
         FontFamily="{DynamicResource MaterialDesignFont}"
         Icon="pack://application:,,,/Assets/PhotoC.ico"
-        Title="PhotoC Settings" Height="760" Width="680"
+        Title="PhotoC Settings" Height="820" Width="720"
         WindowStartupLocation="CenterScreen"
         WindowStyle="None"
         AllowsTransparency="True"
@@ -18,9 +18,102 @@
         SnapsToDevicePixels="True"
         MouseLeftButtonDown="Window_MouseLeftButtonDown">
 
-    <Border CornerRadius="18" Background="#0D1117" BorderBrush="#30363D" BorderThickness="1" Margin="10">
+    <Window.Resources>
+        <!-- Smooth fade-in animation for entire window -->
+        <Storyboard x:Key="WindowFadeIn">
+            <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                             From="0" To="1" Duration="0:0:0.4"/>
+        </Storyboard>
+
+        <!-- Card hover style with glow + lift -->
+        <Style x:Key="HoverCard" TargetType="md:Card">
+            <Setter Property="Background" Value="#161B22"/>
+            <Setter Property="BorderBrush" Value="#30363D"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="UniformCornerRadius" Value="16"/>
+            <Setter Property="Padding" Value="20"/>
+            <Setter Property="Margin" Value="0,0,0,16"/>
+            <Setter Property="RenderTransform">
+                <Setter.Value>
+                    <TranslateTransform Y="0"/>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect BlurRadius="0" ShadowDepth="0" Opacity="0" Color="#58A6FF"/>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Trigger.EnterActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <ColorAnimation Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)"
+                                                To="#58A6FF" Duration="0:0:0.25"/>
+                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.Effect).(DropShadowEffect.BlurRadius)"
+                                                 To="20" Duration="0:0:0.25"/>
+                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.Effect).(DropShadowEffect.Opacity)"
+                                                 To="0.12" Duration="0:0:0.25"/>
+                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
+                                                 To="-2" Duration="0:0:0.2"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.EnterActions>
+                    <Trigger.ExitActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <ColorAnimation Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)"
+                                                To="#30363D" Duration="0:0:0.3"/>
+                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.Effect).(DropShadowEffect.BlurRadius)"
+                                                 To="0" Duration="0:0:0.3"/>
+                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.Effect).(DropShadowEffect.Opacity)"
+                                                 To="0" Duration="0:0:0.3"/>
+                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
+                                                 To="0" Duration="0:0:0.25"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.ExitActions>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Accent gradient brushes -->
+        <LinearGradientBrush x:Key="AccentGradient" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#58A6FF" Offset="0"/>
+            <GradientStop Color="#8B5CF6" Offset="1"/>
+        </LinearGradientBrush>
+        <LinearGradientBrush x:Key="GreenGradient" StartPoint="0,0" EndPoint="1,0">
+            <GradientStop Color="#238636" Offset="0"/>
+            <GradientStop Color="#2EA043" Offset="1"/>
+        </LinearGradientBrush>
+    </Window.Resources>
+
+    <Window.Triggers>
+        <EventTrigger RoutedEvent="Window.Loaded">
+            <BeginStoryboard Storyboard="{StaticResource WindowFadeIn}"/>
+        </EventTrigger>
+    </Window.Triggers>
+
+    <Border CornerRadius="20" Margin="12">
+        <Border.Background>
+            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Color="#0D1117" Offset="0"/>
+                <GradientStop Color="#111821" Offset="0.5"/>
+                <GradientStop Color="#0D1117" Offset="1"/>
+            </LinearGradientBrush>
+        </Border.Background>
+        <Border.BorderBrush>
+            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Color="#30363D" Offset="0"/>
+                <GradientStop Color="#21262D" Offset="0.5"/>
+                <GradientStop Color="#30363D" Offset="1"/>
+            </LinearGradientBrush>
+        </Border.BorderBrush>
+        <Border.BorderThickness>
+            <Thickness>1</Thickness>
+        </Border.BorderThickness>
         <Border.Effect>
-            <DropShadowEffect BlurRadius="28" ShadowDepth="4" Opacity="0.35" Color="#000000" />
+            <DropShadowEffect BlurRadius="36" ShadowDepth="6" Opacity="0.45" Color="#000000" />
         </Border.Effect>
 
         <Grid>
@@ -30,49 +123,110 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <!-- Title Bar -->
-            <Grid Grid.Row="0" Margin="0,16,0,8" Background="Transparent">
+            <!-- ═══ TITLE BAR ═══ -->
+            <Grid Grid.Row="0" Margin="0,18,0,6" Background="Transparent">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 
-                <Border Grid.Column="0" Width="42" Height="42" CornerRadius="12" Background="#161B22" BorderBrush="#30363D" BorderThickness="1" Margin="18,0,12,0">
-                    <TextBlock Text="📷" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <!-- App icon with gradient border -->
+                <Border Grid.Column="0" Width="48" Height="48" CornerRadius="14" Margin="22,0,14,0">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Color="#1A2332" Offset="0"/>
+                            <GradientStop Color="#161B22" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+                    <Border.BorderBrush>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Color="#58A6FF" Offset="0"/>
+                            <GradientStop Color="#8B5CF6" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.BorderBrush>
+                    <Border.BorderThickness>
+                        <Thickness>1.5</Thickness>
+                    </Border.BorderThickness>
+                    <TextBlock Text="📷" FontSize="22" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </Border>
-                <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="5,0,0,0">
-                    <TextBlock Text="PhotoC" FontSize="24" FontWeight="SemiBold" Foreground="#F0F6FC"/>
-                    <TextBlock Text="Phone Photo Auto-Compressor" FontSize="12" Foreground="#8B949E"/>
-                    <TextBlock Text="Created by Parth Dubey" FontSize="11" Foreground="#58A6FF" Margin="0,2,0,0"/>
+
+                <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="3,0,0,0">
+                    <TextBlock FontSize="26" FontWeight="SemiBold">
+                        <TextBlock.Foreground>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                <GradientStop Color="#F0F6FC" Offset="0"/>
+                                <GradientStop Color="#C9D1D9" Offset="1"/>
+                            </LinearGradientBrush>
+                        </TextBlock.Foreground>
+                        PhotoC
+                    </TextBlock>
+                    <TextBlock Text="Phone Photo Auto-Compressor" FontSize="12" Foreground="#6E7681" Margin="0,1,0,0"/>
+                    <TextBlock Text="Created by Parth Dubey" FontSize="11" Margin="0,2,0,0">
+                        <TextBlock.Foreground>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                <GradientStop Color="#58A6FF" Offset="0"/>
+                                <GradientStop Color="#8B5CF6" Offset="1"/>
+                            </LinearGradientBrush>
+                        </TextBlock.Foreground>
+                    </TextBlock>
                 </StackPanel>
 
-                <Button Grid.Column="2" x:Name="CloseButton" Style="{StaticResource MaterialDesignFlatButton}" Width="40" Height="40" Margin="0,0,12,0" Padding="0" Click="CloseButton_Click">
-                    <md:PackIcon Kind="Close" Width="18" Height="18" Foreground="#8B949E" />
+                <Button Grid.Column="2" x:Name="CloseButton" Style="{StaticResource MaterialDesignFlatButton}" Width="42" Height="42" Margin="0,0,14,0" Padding="0" Click="CloseButton_Click">
+                    <md:PackIcon Kind="Close" Width="18" Height="18" Foreground="#6E7681" />
                 </Button>
             </Grid>
 
-            <!-- Content Area -->
-            <ScrollViewer Grid.Row="1" Margin="10,10,10,10" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                <StackPanel Margin="12" Width="Auto">
+            <!-- ═══ CONTENT AREA ═══ -->
+            <ScrollViewer Grid.Row="1" Margin="10,10,10,6" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" CanContentScroll="False" PanningMode="VerticalOnly">
+                <StackPanel Margin="14" Width="Auto">
 
-                    <Border Background="#161B22" BorderBrush="#30363D" BorderThickness="1" CornerRadius="14" Padding="18" Margin="0,0,0,16">
+                    <!-- Hero overview card -->
+                    <Border CornerRadius="16" Padding="20" Margin="0,0,0,16">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                <GradientStop Color="#161B22" Offset="0"/>
+                                <GradientStop Color="#1A2332" Offset="0.6"/>
+                                <GradientStop Color="#161B22" Offset="1"/>
+                            </LinearGradientBrush>
+                        </Border.Background>
+                        <Border.BorderBrush>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                <GradientStop Color="#30363D" Offset="0"/>
+                                <GradientStop Color="#58A6FF" Offset="0.5"/>
+                                <GradientStop Color="#30363D" Offset="1"/>
+                            </LinearGradientBrush>
+                        </Border.BorderBrush>
+                        <Border.BorderThickness>
+                            <Thickness>1</Thickness>
+                        </Border.BorderThickness>
                         <StackPanel>
-                            <TextBlock Text="Settings overview" FontSize="18" FontWeight="SemiBold" Foreground="#F0F6FC"/>
-                            <TextBlock Text="Choose a folder, tune compression, and keep the app running quietly in the tray." Foreground="#8B949E" Margin="0,6,0,0" TextWrapping="Wrap"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                                <md:PackIcon Kind="InformationOutline" Foreground="#58A6FF" Width="20" Height="20" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                <TextBlock Text="Settings overview" FontSize="18" FontWeight="SemiBold" Foreground="#F0F6FC"/>
+                            </StackPanel>
+                            <TextBlock Text="Choose a folder, tune compression quality, and keep PhotoC running quietly in the system tray. Your phone photos are compressed automatically." Foreground="#8B949E" TextWrapping="Wrap" LineHeight="22"/>
                         </StackPanel>
                     </Border>
                     
-                    <!-- Watched Folder Card -->
-                    <md:Card Padding="18" Margin="0,0,0,16" Background="#161B22" BorderBrush="#30363D" BorderThickness="1" UniformCornerRadius="14">
+                    <!-- ═══ WATCHED FOLDER CARD ═══ -->
+                    <md:Card Style="{StaticResource HoverCard}">
                         <StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
-                                <md:PackIcon Kind="FolderOpenOutline" VerticalAlignment="Center" Foreground="#58A6FF" Margin="0,0,8,0"/>
-                                <TextBlock Text="Watched folder" FontWeight="SemiBold" Foreground="#F0F6FC" FontSize="16"/>
+                                <Border Width="32" Height="32" CornerRadius="8" Margin="0,0,10,0">
+                                    <Border.Background>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                            <GradientStop Color="#1A3A5C" Offset="0"/>
+                                            <GradientStop Color="#142A42" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Border.Background>
+                                    <md:PackIcon Kind="FolderOpenOutline" Width="18" Height="18" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#58A6FF"/>
+                                </Border>
+                                <TextBlock Text="Watched folder" FontWeight="SemiBold" Foreground="#F0F6FC" FontSize="16" VerticalAlignment="Center"/>
                             </StackPanel>
-                            <TextBlock Text="PhotoC watches this folder for new images. Point it to your Phone Link, iCloud, or other sync location." Foreground="#8B949E" TextWrapping="Wrap" Margin="0,0,0,12"/>
+                            <TextBlock Text="PhotoC watches this folder for new images. Point it to your Phone Link, iCloud, or other sync location." Foreground="#8B949E" TextWrapping="Wrap" Margin="0,0,0,14" LineHeight="21"/>
                             
-                            <Grid Margin="0,4,0,0">
+                            <Grid Margin="0,0,0,0">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
@@ -81,19 +235,27 @@
                                 <TextBox x:Name="FolderPathBox" Grid.Column="0" IsReadOnly="True" 
                                          md:HintAssist.Hint="Select your Phone Link sync folder..." 
                                          Style="{StaticResource MaterialDesignOutlinedTextBox}" Margin="0,0,10,0" Height="48"/>
-                                <Button Grid.Column="1" Content="Browse..." Click="BrowseButton_Click" Height="48" Padding="18,0" />
+                                <Button Grid.Column="1" Content="Browse..." Click="BrowseButton_Click" Height="48" Padding="20,0" Background="{StaticResource GreenGradient}" Foreground="White"/>
                             </Grid>
                         </StackPanel>
                     </md:Card>
 
-                    <!-- Output Folder Card -->
-                    <md:Card Padding="18" Margin="0,0,0,16" Background="#161B22" BorderBrush="#30363D" BorderThickness="1" UniformCornerRadius="14">
+                    <!-- ═══ OUTPUT FOLDER CARD ═══ -->
+                    <md:Card Style="{StaticResource HoverCard}">
                         <StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
-                                <md:PackIcon Kind="FolderMoveOutline" VerticalAlignment="Center" Foreground="#3FB950" Margin="0,0,8,0"/>
-                                <TextBlock Text="Output folder" FontWeight="SemiBold" Foreground="#F0F6FC" FontSize="16"/>
+                                <Border Width="32" Height="32" CornerRadius="8" Margin="0,0,10,0">
+                                    <Border.Background>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                            <GradientStop Color="#1A3C2A" Offset="0"/>
+                                            <GradientStop Color="#142A1A" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Border.Background>
+                                    <md:PackIcon Kind="FolderMoveOutline" Width="18" Height="18" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#3FB950"/>
+                                </Border>
+                                <TextBlock Text="Output folder" FontWeight="SemiBold" Foreground="#F0F6FC" FontSize="16" VerticalAlignment="Center"/>
                             </StackPanel>
-                            <TextBlock Text="Save compressed photos to a separate folder, keeping your originals untouched. If disabled, originals are replaced in-place." Foreground="#8B949E" TextWrapping="Wrap" Margin="0,0,0,12"/>
+                            <TextBlock Text="Save compressed photos to a separate folder, keeping your originals untouched. If disabled, originals are replaced in-place." Foreground="#8B949E" TextWrapping="Wrap" Margin="0,0,0,12" LineHeight="21"/>
 
                             <CheckBox x:Name="SaveToOutputFolderCheckBox" Content="Save compressed photos to a separate folder" Margin="0,0,0,12" Foreground="#F0F6FC" Checked="OutputFolderToggle_Changed" Unchecked="OutputFolderToggle_Changed"/>
 
@@ -106,94 +268,100 @@
                                 <TextBox x:Name="OutputFolderPathBox" Grid.Column="0" IsReadOnly="True" 
                                          md:HintAssist.Hint="Select output folder for compressed photos..." 
                                          Style="{StaticResource MaterialDesignOutlinedTextBox}" Margin="0,0,10,0" Height="48"/>
-                                <Button Grid.Column="1" Content="Browse..." Click="BrowseOutputButton_Click" Height="48" Padding="18,0" />
+                                <Button Grid.Column="1" Content="Browse..." Click="BrowseOutputButton_Click" Height="48" Padding="20,0" Background="{StaticResource GreenGradient}" Foreground="White"/>
                             </Grid>
-                            <TextBlock x:Name="OutputFolderHint" Text="Originals will be replaced in-place." FontSize="11" Foreground="#8B949E" Margin="0,6,0,0" TextWrapping="Wrap"/>
+                            <TextBlock x:Name="OutputFolderHint" Text="Originals will be replaced in-place." FontSize="11" Foreground="#6E7681" Margin="0,8,0,0" TextWrapping="Wrap"/>
                         </StackPanel>
                     </md:Card>
 
-                    <!-- Quality Card -->
-                    <md:Card Padding="18" Margin="0,0,0,16" Background="#161B22" BorderBrush="#30363D" BorderThickness="1" UniformCornerRadius="14">
+                    <!-- ═══ QUALITY CARD ═══ -->
+                    <md:Card Style="{StaticResource HoverCard}">
                         <StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
-                                <md:PackIcon Kind="LightningBoltOutline" VerticalAlignment="Center" Foreground="#58A6FF" Margin="0,0,8,0"/>
-                                <TextBlock Text="Compression quality" FontWeight="SemiBold" Foreground="#F0F6FC" FontSize="16"/>
+                                <Border Width="32" Height="32" CornerRadius="8" Margin="0,0,10,0">
+                                    <Border.Background>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                            <GradientStop Color="#3A1A5C" Offset="0"/>
+                                            <GradientStop Color="#2A1442" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Border.Background>
+                                    <md:PackIcon Kind="LightningBoltOutline" Width="18" Height="18" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#8B5CF6"/>
+                                </Border>
+                                <TextBlock Text="Compression quality" FontWeight="SemiBold" Foreground="#F0F6FC" FontSize="16" VerticalAlignment="Center"/>
                             </StackPanel>
-                            <TextBlock Text="ShortPixel SmartCompress™-style adaptive compression: PhotoC tries multiple quality levels (Q80 → Q70) and keeps the smallest visually lossless result. Expect 60–95% reduction on phone photos." Foreground="#8B949E" TextWrapping="Wrap" Margin="0,0,0,12"/>
+                            <TextBlock Text="ShortPixel SmartCompress™-style adaptive compression. PhotoC sweeps quality levels and keeps the smallest visually lossless result. Expect 60–95% reduction." Foreground="#8B949E" TextWrapping="Wrap" Margin="0,0,0,14" LineHeight="21"/>
 
-                            <!-- JPEG -->
-                            <Grid Margin="0,10,0,4">
+                            <!-- JPEG Quality -->
+                            <Grid Margin="0,4,0,4">
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="170" />
+                                    <ColumnDefinition Width="160" />
                                     <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="50" />
+                                    <ColumnDefinition Width="54" />
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="JPEG Quality" VerticalAlignment="Center" Foreground="#F0F6FC"/>
+                                <TextBlock Text="JPEG Quality" VerticalAlignment="Center" Foreground="#C9D1D9"/>
                                 <Slider Grid.Column="1" x:Name="JpegSlider" Minimum="60" Maximum="100" Value="80" TickFrequency="1" AutoToolTipPlacement="TopLeft" IsSnapToTickEnabled="True" IsMoveToPointEnabled="True" VerticalAlignment="Center" Margin="10,0" Height="28"/>
-                                <TextBlock Grid.Column="2" Text="{Binding ElementName=JpegSlider, Path=Value}" VerticalAlignment="Center" FontWeight="SemiBold" Foreground="#58A6FF"/>
+                                <Border Grid.Column="2" Background="#1A2332" CornerRadius="8" Padding="6,4" HorizontalAlignment="Center">
+                                    <TextBlock Text="{Binding ElementName=JpegSlider, Path=Value}" VerticalAlignment="Center" FontWeight="Bold" Foreground="#58A6FF" FontSize="15" HorizontalAlignment="Center" Width="30" TextAlignment="Center"/>
+                                </Border>
                             </Grid>
-                            <TextBlock Text="Q80 = ShortPixel Glossy (visually lossless). Q70 = ShortPixel Lossy (max savings). Smart sweep tests all levels in between and keeps the smallest." FontSize="11" Foreground="#8B949E" Margin="170,0,0,10" TextWrapping="Wrap"/>
+                            <TextBlock Text="Q80 = Glossy (visually lossless) · Q70 = Lossy (max savings)" FontSize="11" Foreground="#6E7681" Margin="160,0,0,14" TextWrapping="Wrap"/>
 
-                            <!-- WebP -->
-                            <Grid Margin="0,8,0,4">
+                            <!-- WebP Quality -->
+                            <Grid Margin="0,4,0,4">
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="170" />
+                                    <ColumnDefinition Width="160" />
                                     <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="50" />
+                                    <ColumnDefinition Width="54" />
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="WebP Quality" VerticalAlignment="Center" Foreground="#F0F6FC"/>
+                                <TextBlock Text="WebP Quality" VerticalAlignment="Center" Foreground="#C9D1D9"/>
                                 <Slider Grid.Column="1" x:Name="WebpSlider" Minimum="1" Maximum="100" Value="100" TickFrequency="1" AutoToolTipPlacement="TopLeft" IsSnapToTickEnabled="True" IsMoveToPointEnabled="True" VerticalAlignment="Center" Margin="10,0" Height="28"/>
-                                <TextBlock Grid.Column="2" Text="{Binding ElementName=WebpSlider, Path=Value}" VerticalAlignment="Center" FontWeight="SemiBold" Foreground="#58A6FF"/>
+                                <Border Grid.Column="2" Background="#1A2332" CornerRadius="8" Padding="6,4" HorizontalAlignment="Center">
+                                    <TextBlock Text="{Binding ElementName=WebpSlider, Path=Value}" VerticalAlignment="Center" FontWeight="Bold" Foreground="#58A6FF" FontSize="15" HorizontalAlignment="Center" Width="30" TextAlignment="Center"/>
+                                </Border>
                             </Grid>
-                            <TextBlock Text="WebP is set to lossless mode for exact pixel preservation." FontSize="11" Foreground="#8B949E" Margin="170,0,0,10" TextWrapping="Wrap"/>
+                            <TextBlock Text="Lossless mode — exact pixel preservation" FontSize="11" Foreground="#6E7681" Margin="160,0,0,14" TextWrapping="Wrap"/>
 
-                            <!-- PNG -->
-                            <Grid Margin="0,10,0,0">
+                            <!-- PNG Level -->
+                            <Grid Margin="0,6,0,0">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="200" />
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="PNG Level (0-9)" VerticalAlignment="Center" Foreground="#F0F6FC"/>
+                                <TextBlock Text="PNG Level (0–9)" VerticalAlignment="Center" Foreground="#C9D1D9"/>
                                 <TextBox Grid.Column="1" x:Name="PngLevelBox" Text="9" MaxLength="1" Width="72" HorizontalAlignment="Left" Style="{StaticResource MaterialDesignOutlinedTextBox}" Height="44" TextAlignment="Center" VerticalContentAlignment="Center" Padding="0" FontSize="16"/>
                             </Grid>
-                            <TextBlock Text="Level 9 gives the strongest lossless compression for PNG, BMP-to-PNG, and TIFF-to-PNG." FontSize="11" Foreground="#8B949E" Margin="200,5,0,0" TextWrapping="Wrap"/>
+                            <TextBlock Text="Level 9 = strongest lossless compression for PNG, BMP→PNG, TIFF→PNG." FontSize="11" Foreground="#6E7681" Margin="200,5,0,0" TextWrapping="Wrap"/>
                         </StackPanel>
                     </md:Card>
 
-                    <!-- Behavior Card -->
-                    <md:Card Padding="18" Margin="0,0,0,16" Background="#161B22" BorderBrush="#30363D" BorderThickness="1" UniformCornerRadius="14">
+                    <!-- ═══ SYSTEM SETTINGS CARD ═══ -->
+                    <md:Card Style="{StaticResource HoverCard}">
                         <StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
-                                <md:PackIcon Kind="CogOutline" VerticalAlignment="Center" Foreground="#58A6FF" Margin="0,0,8,0"/>
-                                <TextBlock Text="Behavior" FontWeight="SemiBold" Foreground="#F0F6FC" FontSize="16"/>
+                                <Border Width="32" Height="32" CornerRadius="8" Margin="0,0,10,0">
+                                    <Border.Background>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                            <GradientStop Color="#1A2F3C" Offset="0"/>
+                                            <GradientStop Color="#14222A" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Border.Background>
+                                    <md:PackIcon Kind="WindowRestore" Width="18" Height="18" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#58A6FF"/>
+                                </Border>
+                                <TextBlock Text="System settings" FontWeight="SemiBold" Foreground="#F0F6FC" FontSize="16" VerticalAlignment="Center"/>
                             </StackPanel>
-                            <TextBlock Text="These controls decide when files are skipped and whether PhotoC starts with Windows." Foreground="#8B949E" TextWrapping="Wrap" Margin="0,0,0,12"/>
+                            <TextBlock Text="Configure how PhotoC integrates with your system." Foreground="#8B949E" TextWrapping="Wrap" Margin="0,0,0,12" LineHeight="21"/>
 
-                            <Grid Margin="0,5,0,4">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="210" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Text="Max image dimension (px)" VerticalAlignment="Center" Foreground="#F0F6FC"/>
-                                <TextBox Grid.Column="1" x:Name="MaxDimensionBox" Text="0" Width="110" HorizontalAlignment="Left" Style="{StaticResource MaterialDesignOutlinedTextBox}" Height="44" TextAlignment="Center" VerticalContentAlignment="Center" Padding="0" FontSize="16"/>
-                            </Grid>
-                            <TextBlock Text="Downscale oversized photos before compression. 0 = disabled (no quality loss). Set to 3840 for 4K if you want smaller files at the cost of resolution." FontSize="11" Foreground="#8B949E" Margin="0,0,0,12" TextWrapping="Wrap"/>
-
-                            <Grid Margin="0,5,0,12">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="210" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Text="Skip files under (KB)" VerticalAlignment="Center" Foreground="#F0F6FC"/>
-                                <TextBox Grid.Column="1" x:Name="MinSizeBox" Text="2048" Width="110" HorizontalAlignment="Left" Style="{StaticResource MaterialDesignOutlinedTextBox}" Height="44" TextAlignment="Center" VerticalContentAlignment="Center" Padding="0" FontSize="16"/>
-                            </Grid>
-                            <TextBlock Text="Smaller files usually do not benefit much from recompression, so they are skipped to save CPU." FontSize="11" Foreground="#8B949E" Margin="0,0,0,12" TextWrapping="Wrap"/>
-
-                            <CheckBox x:Name="StartupCheckBox" Content="Run PhotoC automatically when Windows starts" Margin="0,0,0,5" Foreground="#F0F6FC"/>
-                            <TextBlock Text="Adds or removes a registry entry under the current user only." FontSize="11" Foreground="#8B949E" Margin="28,2,0,0" TextWrapping="Wrap"/>
+                            <CheckBox x:Name="StartupCheckBox" Content="Start PhotoC automatically on Windows startup" Margin="0,0,0,0" Foreground="#F0F6FC"/>
                         </StackPanel>
                     </md:Card>
 
+                    <!-- Hidden controls kept for code-behind compatibility -->
+                    <StackPanel Visibility="Collapsed">
+                        <TextBox x:Name="MaxDimensionBox" Text="0"/>
+                        <TextBox x:Name="MinSizeBox" Text="2048"/>
+                    </StackPanel>
+
+                    <!-- Dialog host for save confirmation -->
                     <md:DialogHost x:Name="FlashDialogHost">
                         <md:DialogHost.DialogContent>
                             <StackPanel Margin="20" Orientation="Horizontal">
@@ -203,35 +371,68 @@
                         </md:DialogHost.DialogContent>
                     </md:DialogHost>
 
-                    <!-- Status Text -->
-                    <Border Background="#161B22" BorderBrush="#30363D" BorderThickness="1" CornerRadius="12" Padding="14" Margin="0,0,0,0">
+                    <!-- ═══ STATUS BAR ═══ -->
+                    <Border CornerRadius="14" Padding="16" Margin="0,0,0,0">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                <GradientStop Color="#161B22" Offset="0"/>
+                                <GradientStop Color="#1A2332" Offset="0.5"/>
+                                <GradientStop Color="#161B22" Offset="1"/>
+                            </LinearGradientBrush>
+                        </Border.Background>
+                        <Border.BorderBrush>
+                            <SolidColorBrush Color="#30363D"/>
+                        </Border.BorderBrush>
+                        <Border.BorderThickness>
+                            <Thickness>1</Thickness>
+                        </Border.BorderThickness>
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                             <md:PackIcon x:Name="StatusDot" Kind="Circle" Foreground="Red" VerticalAlignment="Center" Margin="0,0,8,0" Width="10" Height="10"/>
                             <TextBlock x:Name="StatusText" Text="Loading status..." Opacity="0.9" FontSize="12" Foreground="#C9D1D9"/>
                         </StackPanel>
                     </Border>
-                    <Border Background="#161B22" BorderBrush="#30363D" BorderThickness="1" CornerRadius="12" Padding="14" Margin="0,14,0,0">
+
+                    <!-- Help section -->
+                    <Border Background="#0D1117" BorderBrush="#21262D" BorderThickness="1" CornerRadius="14" Padding="16" Margin="0,14,0,0">
                         <StackPanel>
-                            <TextBlock Text="What each option does" FontSize="14" FontWeight="SemiBold" Foreground="#F0F6FC"/>
-                            <TextBlock Text="JPEG controls re-encode quality for camera photos. PNG level controls exact lossless compression. The skip threshold avoids wasting CPU on small files. Startup controls whether PhotoC appears automatically after login." Foreground="#8B949E" TextWrapping="Wrap" Margin="0,6,0,0"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                                <md:PackIcon Kind="HelpCircleOutline" Foreground="#6E7681" Width="16" Height="16" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                <TextBlock Text="How it works" FontSize="13" FontWeight="SemiBold" Foreground="#8B949E"/>
+                            </StackPanel>
+                            <TextBlock Foreground="#6E7681" TextWrapping="Wrap" FontSize="12" LineHeight="20"
+                                Text="JPEG quality sweeps find the smallest visually lossless file. PNG uses maximum lossless DEFLATE. Read-only phone photos are handled automatically. On restart, PhotoC detects unchanged folders and skips them."/>
                         </StackPanel>
                     </Border>
-                    <TextBlock Text="Created by Parth Dubey" Foreground="#58A6FF" FontSize="11" HorizontalAlignment="Right" Margin="0,10,4,0"/>
+                    <TextBlock Foreground="#6E7681" FontSize="11" HorizontalAlignment="Right" Margin="0,10,4,0">
+                        <TextBlock.Inlines>
+                            <Run Text="PhotoC v2.0"/>
+                            <Run Text=" · "/>
+                            <Run Foreground="#58A6FF" Text="Created by Parth Dubey"/>
+                        </TextBlock.Inlines>
+                    </TextBlock>
                 </StackPanel>
             </ScrollViewer>
 
-            <!-- Buttons Grid -->
-            <Grid Grid.Row="2" Margin="30,10,30,20">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                
-                <Button Grid.Column="0" Content="Save &amp; Apply" Style="{StaticResource MaterialDesignRaisedButton}" Margin="0,0,15,0" Click="SaveButton_Click"/>
-                <Button Grid.Column="1" Content="View Log" Style="{StaticResource MaterialDesignOutlinedButton}" Margin="0,0,15,0" Click="ViewLogButton_Click"/>
-                <Button Grid.Column="2" Content="Cancel" Style="{StaticResource MaterialDesignFlatButton}" Click="CloseButton_Click"/>
-            </Grid>
+            <!-- ═══ BUTTON BAR ═══ -->
+            <Border Grid.Row="2" Margin="0,0,0,0" Padding="24,12,24,18">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                        <GradientStop Color="#00000000" Offset="0"/>
+                        <GradientStop Color="#0D1117" Offset="0.3"/>
+                    </LinearGradientBrush>
+                </Border.Background>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <Button Grid.Column="0" Content="💾  Save &amp; Apply" Height="44" Margin="0,0,12,0" FontWeight="SemiBold" Click="SaveButton_Click" Background="{StaticResource GreenGradient}" Foreground="White"/>
+                    <Button Grid.Column="1" Content="📋  View Log" Style="{StaticResource MaterialDesignOutlinedButton}" Height="44" Margin="0,0,12,0" Click="ViewLogButton_Click" Foreground="#8B949E" BorderBrush="#30363D"/>
+                    <Button Grid.Column="2" Content="Cancel" Style="{StaticResource MaterialDesignFlatButton}" Height="44" Click="CloseButton_Click" Foreground="#6E7681"/>
+                </Grid>
+            </Border>
 
         </Grid>
     </Border>
