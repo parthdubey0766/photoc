@@ -14,8 +14,7 @@ public class QueueService : IDisposable
     private CancellationTokenSource _cts = new();
     private readonly List<Task> _workerTasks = new();
     private readonly ConcurrentDictionary<string, byte> _queuedOrProcessing = new(StringComparer.OrdinalIgnoreCase);
-    // Single worker — keeps only one image's native pixel buffers in memory at a time
-    private readonly int _maxWorkers = 1;
+    private int _maxWorkers = 1;
 
     // Stats
     public int TotalProcessed { get; private set; }
@@ -63,10 +62,13 @@ public class QueueService : IDisposable
     // Lifecycle
     // -----------------------------------------------------------------
 
-    public void Start()
+    public void Start(int? workerCount = null)
     {
         if (_workerTasks.Any(t => !t.IsCompleted))
             return;
+
+        if (workerCount.HasValue)
+            _maxWorkers = Math.Clamp(workerCount.Value, 1, 4);
 
         _cts = new CancellationTokenSource();
         _isPaused = false;
@@ -76,6 +78,14 @@ public class QueueService : IDisposable
             _workerTasks.Add(Task.Run(() => WorkerLoop(i + 1)));
 
         Log.Information("Queue workers started. Count={Count}", _maxWorkers);
+    }
+
+    /// <summary>Restarts workers with a new count.</summary>
+    public void UpdateWorkerCount(int count)
+    {
+        _maxWorkers = Math.Clamp(count, 1, 4);
+        Stop();
+        Start();
     }
 
     public void Pause()

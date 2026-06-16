@@ -1,5 +1,10 @@
 # Version History
 
+## v1.3.0
+- **Feature**: Excluded folders — WhatsApp and .thumbnails folders are now skipped by default. You can customize the list in Settings (comma-separated).
+- **Feature**: Compression speed control — new "Workers" slider (1–4) lets you choose how many images are compressed in parallel for faster processing.
+- **Feature**: Minimum file size filter — new slider in Settings to control the file size threshold below which images are skipped. Default 2048 KB (2 MB).
+
 ## v1.2.0
 - **Feature**: EXIF metadata tagging — compressed files are now tagged with "Compressed by PhotoC" in the EXIF Software field. Files with this tag are automatically skipped on future runs. Filenames are no longer modified.
 - **Bugfix**: Removed bounded queue limit (was 100) — all files are now queued regardless of folder size.

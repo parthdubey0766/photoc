@@ -355,6 +355,92 @@
                         </StackPanel>
                     </md:Card>
 
+                    <!-- ═══ EXCLUDED FOLDERS CARD ═══ -->
+                    <md:Card Style="{StaticResource HoverCard}">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                                <Border Width="32" Height="32" CornerRadius="8" Margin="0,0,10,0">
+                                    <Border.Background>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                            <GradientStop Color="#3C1A1A" Offset="0"/>
+                                            <GradientStop Color="#2A1414" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Border.Background>
+                                    <md:PackIcon Kind="FolderRemoveOutline" Width="18" Height="18" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#F85149"/>
+                                </Border>
+                                <TextBlock Text="Excluded folders" FontWeight="SemiBold" Foreground="#F0F6FC" FontSize="16" VerticalAlignment="Center"/>
+                            </StackPanel>
+                            <TextBlock Text="Folder names to skip when scanning recursively (e.g. WhatsApp, .thumbnails). Separate multiple names with commas." Foreground="#8B949E" TextWrapping="Wrap" Margin="0,0,0,14" LineHeight="21"/>
+                            <TextBox x:Name="ExcludedFoldersBox" Text="WhatsApp, .thumbnails"
+                                     md:HintAssist.Hint="e.g. WhatsApp, .thumbnails, Telegram"
+                                     Style="{StaticResource MaterialDesignOutlinedTextBox}" Height="48"/>
+                        </StackPanel>
+                    </md:Card>
+
+                    <!-- ═══ COMPRESSION SPEED CARD ═══ -->
+                    <md:Card Style="{StaticResource HoverCard}">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                                <Border Width="32" Height="32" CornerRadius="8" Margin="0,0,10,0">
+                                    <Border.Background>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                            <GradientStop Color="#1A3C3C" Offset="0"/>
+                                            <GradientStop Color="#142A2A" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Border.Background>
+                                    <md:PackIcon Kind="SpeedometerMedium" Width="18" Height="18" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#3FB950"/>
+                                </Border>
+                                <TextBlock Text="Compression speed" FontWeight="SemiBold" Foreground="#F0F6FC" FontSize="16" VerticalAlignment="Center"/>
+                            </StackPanel>
+                            <TextBlock Text="Control how many images are compressed in parallel. Higher = faster but uses more CPU and memory." Foreground="#8B949E" TextWrapping="Wrap" Margin="0,0,0,14" LineHeight="21"/>
+                            <Grid Margin="0,4,0,4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="160" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="54" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Workers" VerticalAlignment="Center" Foreground="#C9D1D9"/>
+                                <Slider Grid.Column="1" x:Name="WorkersSlider" Minimum="1" Maximum="4" Value="1" TickFrequency="1" AutoToolTipPlacement="TopLeft" IsSnapToTickEnabled="True" IsMoveToPointEnabled="True" VerticalAlignment="Center" Margin="10,0" Height="28"/>
+                                <Border Grid.Column="2" Background="#1A2332" CornerRadius="8" Padding="6,4" HorizontalAlignment="Center">
+                                    <TextBlock Text="{Binding ElementName=WorkersSlider, Path=Value}" VerticalAlignment="Center" FontWeight="Bold" Foreground="#3FB950" FontSize="15" HorizontalAlignment="Center" Width="30" TextAlignment="Center"/>
+                                </Border>
+                            </Grid>
+                            <TextBlock Text="1 = sequential (low CPU) · 4 = fast (high CPU)" FontSize="11" Foreground="#6E7681" Margin="160,0,0,0" TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </md:Card>
+
+                    <!-- ═══ FILE SIZE FILTER CARD ═══ -->
+                    <md:Card Style="{StaticResource HoverCard}">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                                <Border Width="32" Height="32" CornerRadius="8" Margin="0,0,10,0">
+                                    <Border.Background>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                            <GradientStop Color="#3C2A1A" Offset="0"/>
+                                            <GradientStop Color="#2A1E14" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Border.Background>
+                                    <md:PackIcon Kind="FileDocumentOutline" Width="18" Height="18" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#F0883E"/>
+                                </Border>
+                                <TextBlock Text="Minimum file size" FontWeight="SemiBold" Foreground="#F0F6FC" FontSize="16" VerticalAlignment="Center"/>
+                            </StackPanel>
+                            <TextBlock Text="Files smaller than this size will be skipped — they don't need compression." Foreground="#8B949E" TextWrapping="Wrap" Margin="0,0,0,14" LineHeight="21"/>
+                            <Grid Margin="0,4,0,4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="160" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="70" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Skip below (KB)" VerticalAlignment="Center" Foreground="#C9D1D9"/>
+                                <Slider Grid.Column="1" x:Name="MinSizeSlider" Minimum="0" Maximum="10240" Value="2048" TickFrequency="256" AutoToolTipPlacement="TopLeft" IsSnapToTickEnabled="True" IsMoveToPointEnabled="True" VerticalAlignment="Center" Margin="10,0" Height="28"/>
+                                <Border Grid.Column="2" Background="#1A2332" CornerRadius="8" Padding="6,4" HorizontalAlignment="Center">
+                                    <TextBlock Text="{Binding ElementName=MinSizeSlider, Path=Value}" VerticalAlignment="Center" FontWeight="Bold" Foreground="#F0883E" FontSize="15" HorizontalAlignment="Center" Width="50" TextAlignment="Center"/>
+                                </Border>
+                            </Grid>
+                            <TextBlock Text="Default 2048 KB (2 MB). Set to 0 to compress all files." FontSize="11" Foreground="#6E7681" Margin="160,0,0,0" TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </md:Card>
+
                     <!-- Hidden controls kept for code-behind compatibility -->
                     <StackPanel Visibility="Collapsed">
                         <TextBox x:Name="MaxDimensionBox" Text="0"/>

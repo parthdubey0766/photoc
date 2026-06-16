@@ -54,6 +54,15 @@ public partial class SettingsWindow : Window
         OutputFolderPathBox.Text = s.OutputFolderPath;
         UpdateOutputFolderVisibility(s.SaveToOutputFolder);
 
+        // Excluded folders
+        ExcludedFoldersBox.Text = string.Join(", ", s.ExcludedFolders ?? new List<string>());
+
+        // Compression speed
+        WorkersSlider.Value = Math.Clamp(s.CompressionWorkers, 1, 4);
+
+        // Min file size
+        MinSizeSlider.Value = Math.Clamp(s.MinFileSizeKB, 0, 10240);
+
         RefreshStatus();
     }
 
@@ -121,6 +130,19 @@ public partial class SettingsWindow : Window
         settings.SaveToOutputFolder = SaveToOutputFolderCheckBox.IsChecked == true;
         settings.OutputFolderPath = OutputFolderPathBox.Text.Trim();
 
+        // Excluded folders
+        settings.ExcludedFolders = ExcludedFoldersBox.Text
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Where(s => !string.IsNullOrWhiteSpace(s))
+            .ToList();
+
+        // Compression speed
+        settings.CompressionWorkers = (int)WorkersSlider.Value;
+
+        // Min file size (from slider)
+        settings.MinFileSizeKB = (int)MinSizeSlider.Value;
+        MinSizeBox.Text = settings.MinFileSizeKB.ToString();
+
         if (string.IsNullOrWhiteSpace(settings.WatchedFolderPath))
         {
             MessageBox.Show("Please select a folder to watch.", "PhotoC", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -138,12 +160,13 @@ public partial class SettingsWindow : Window
 
         if (!_watcher.IsRunning)
         {
-            _queue.Start();
+            _queue.Start(settings.CompressionWorkers);
             _watcher.Start(settings);
         }
         else
         {
             _watcher.UpdateSettings(settings);
+            _queue.UpdateWorkerCount(settings.CompressionWorkers);
         }
 
         RefreshStatus();

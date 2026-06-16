@@ -139,6 +139,10 @@ public class FolderWatcherService : IDisposable
         if (fullPath.EndsWith(".photoc.tmp", StringComparison.OrdinalIgnoreCase))
             return;
 
+        // Skip files inside excluded folders (e.g. WhatsApp, .thumbnails)
+        if (IsInExcludedFolder(fullPath))
+            return;
+
         // Skip files that are inside the output folder (avoid processing our own output)
         if (_settings.SaveToOutputFolder && !string.IsNullOrWhiteSpace(_settings.OutputFolderPath))
         {
@@ -208,6 +212,7 @@ public class FolderWatcherService : IDisposable
             var files = Directory.EnumerateFiles(_settings.WatchedFolderPath, "*.*", SearchOption.AllDirectories)
                 .Where(path => _settings.FileExtensions.Contains(Path.GetExtension(path).ToLowerInvariant()))
                 .Where(path => !path.EndsWith(".photoc.tmp", StringComparison.OrdinalIgnoreCase))
+                .Where(path => !IsInExcludedFolder(path))
                 .ToList();
 
             foreach (var file in files)
@@ -225,6 +230,27 @@ public class FolderWatcherService : IDisposable
     // -----------------------------------------------------------------
     // IDisposable
     // -----------------------------------------------------------------
+
+    /// <summary>
+    /// Returns true if the file is inside a folder whose name matches
+    /// one of the entries in <see cref="AppSettings.ExcludedFolders"/>.
+    /// </summary>
+    private bool IsInExcludedFolder(string fullPath)
+    {
+        if (_settings.ExcludedFolders == null || _settings.ExcludedFolders.Count == 0)
+            return false;
+
+        var dir = Path.GetDirectoryName(fullPath);
+        while (!string.IsNullOrEmpty(dir))
+        {
+            var folderName = Path.GetFileName(dir);
+            if (_settings.ExcludedFolders.Any(ex =>
+                folderName.Equals(ex, StringComparison.OrdinalIgnoreCase)))
+                return true;
+            dir = Path.GetDirectoryName(dir);
+        }
+        return false;
+    }
 
     public void Dispose() => Stop();
 }

@@ -89,4 +89,17 @@ public class AppSettings
     /// Only used when <see cref="SaveToOutputFolder"/> is true.
     /// </summary>
     public string OutputFolderPath { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Folder names to exclude from recursive watching (case-insensitive).
+    /// Files inside any folder whose name matches an entry here will be skipped.
+    /// Default: ["WhatsApp", ".thumbnails"].
+    /// </summary>
+    public List<string> ExcludedFolders { get; set; } = ["WhatsApp", ".thumbnails"];
+
+    /// <summary>
+    /// Number of parallel compression workers. More workers = faster but uses
+    /// more CPU and memory. Default 1 (sequential). Max 4.
+    /// </summary>
+    public int CompressionWorkers { get; set; } = 1;
 }
