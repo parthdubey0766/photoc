@@ -37,6 +37,9 @@ public class ImageProcessorService
 {
     private readonly ConfigurationService _config;
 
+    /// <summary>Marker value written to EXIF UserComment to identify files already compressed by PhotoC.</summary>
+    private const string PhotoCMarker = "Compressed by PhotoC";
+
     public event Action<string, long, long>? FileCompressed;
     public event Action<string, string>? FileSkipped;
     public event Action<string, string>? FileError;
@@ -44,6 +47,54 @@ public class ImageProcessorService
     public ImageProcessorService(ConfigurationService config)
     {
         _config = config;
+    }
+
+    // -----------------------------------------------------------------
+    // PhotoC EXIF tag helpers
+    // -----------------------------------------------------------------
+
+    /// <summary>
+    /// Returns <c>true</c> if the file's EXIF Software tag contains the PhotoC marker,
+    /// meaning it has already been compressed and should be skipped.
+    /// </summary>
+    private static bool HasPhotoCTag(string filePath)
+    {
+        try
+        {
+            using var image = new MagickImage();
+            image.Ping(filePath); // reads only metadata, not pixel data
+            var exif = image.GetExifProfile();
+            if (exif == null) return false;
+
+            var software = exif.GetValue(ExifTag.Software);
+            return software?.Value?.Contains(PhotoCMarker, StringComparison.OrdinalIgnoreCase) == true;
+        }
+        catch
+        {
+            return false; // if we can't read metadata, assume not tagged
+        }
+    }
+
+    /// <summary>
+    /// Stamps the PhotoC marker into the EXIF Software tag of the given file.
+    /// Preserves any existing EXIF data; only adds/updates the Software field.
+    /// </summary>
+    private static void StampPhotoCTag(string filePath)
+    {
+        try
+        {
+            using var image = new MagickImage(filePath);
+            var exif = image.GetExifProfile() ?? new ExifProfile();
+            exif.SetValue(ExifTag.Software, PhotoCMarker);
+            image.SetProfile(exif);
+            image.Write(filePath);
+            Log.Debug("Stamped PhotoC tag on '{File}'", Path.GetFileName(filePath));
+        }
+        catch (Exception ex)
+        {
+            Log.Debug("Could not stamp PhotoC tag on '{File}': {Msg}",
+                Path.GetFileName(filePath), ex.Message);
+        }
     }
 
     // -----------------------------------------------------------------
@@ -58,6 +109,14 @@ public class ImageProcessorService
         if (!File.Exists(filePath))
         {
             Log.Warning("Skipping '{File}': no longer exists.", fileName);
+            return false;
+        }
+
+        // Skip files already compressed by PhotoC (tagged in EXIF)
+        if (HasPhotoCTag(filePath))
+        {
+            Log.Information("Skipping '{File}': already compressed by PhotoC (EXIF tag found)", fileName);
+            FileSkipped?.Invoke(filePath, "Already compressed by PhotoC");
             return false;
         }
 
@@ -171,6 +230,9 @@ public class ImageProcessorService
 
             // ── 10. Place the final file ───────────────────────────────────
             FinalizeOutput(filePath, actualTmpPath, actualTargetPath, settings);
+
+            // ── 11. Stamp PhotoC EXIF tag so we never re-process this file ──
+            StampPhotoCTag(actualTargetPath);
 
             Log.Information(
                 "✓ Compressed '{File}': {Old} KB → {New} KB ({Ratio:F1}% smaller)",
@@ -295,6 +357,9 @@ public class ImageProcessorService
             // Place the final file
             string targetPath = ResolveTargetPath(filePath, ".jpg", ".jpg", settings);
             FinalizeOutput(filePath, bestTmpPath, targetPath, settings);
+
+            // Stamp PhotoC EXIF tag so we never re-process this file
+            StampPhotoCTag(targetPath);
 
             Log.Information(
                 "✓ Smart-compressed '{File}' at Q{Q}: {Old} KB → {New} KB ({Ratio:F1}% smaller)",
