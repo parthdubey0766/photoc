@@ -88,7 +88,7 @@ PhotoC/
 	└─ UI/
 ```
 
-## Future Improvements
+### Future Improvements
 
 - Optional backup mode before in-place replacement.
 - Folder-specific compression profiles.
