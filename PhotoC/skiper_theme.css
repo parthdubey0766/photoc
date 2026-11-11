@@ -1,0 +1,36 @@
+/* Skiper UI & Animaster Lib Design System for PhotoC */
+.skiper-glass {
+  background: rgba(26, 27, 40, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(212, 168, 85, 0.2);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+.skiper-card-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.skiper-card-hover:hover {
+  transform: translateY(-6px) scale(1.01);
+  border-color: rgba(212, 168, 85, 0.6);
+  box-shadow: 0 20px 40px rgba(212, 168, 85, 0.15), 0 0 20px rgba(0, 0, 0, 0.8);
+}
+
+.glow-btn {
+  background: linear-gradient(135deg, #d4a855 0%, #b8860b 100%);
+  color: #000 !important;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(212, 168, 85, 0.4);
+}
+.glow-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(212, 168, 85, 0.6);
+  filter: brightness(1.1);
+}
+
+.animaster-gradient-text {
+  background: linear-gradient(135deg, #ffffff 0%, #d4a855 50%, #f3e5ab 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
